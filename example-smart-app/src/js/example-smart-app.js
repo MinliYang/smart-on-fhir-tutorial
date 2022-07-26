@@ -42,10 +42,13 @@
           
           var allergy_list = new Array();
           for (let index = 0; index < allergy.length; ++index) {
-              allergy_list[index] = allergy[index].code.text;
+             allergy_string = allergy_string + "<tr><td>";
+         //     allergy_list[index] = allergy[index].code.text;
+              allergy_string = allergy_string + allergy[index].code.text;
+               allergy_string = allergy_string +  "</td></tr>";
           }
-          var allergy_string = allergy_list.join("</div><div>");
-          allergy_string = "<div>" + allergy_string + "</div>";
+         // var allergy_string = allergy_list.join("</div><div>");
+        //  allergy_string = "<div>" + allergy_string + "</div>";
           
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
