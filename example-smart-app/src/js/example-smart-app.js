@@ -19,6 +19,7 @@
                               'http://loinc.org|85354-9', // blood presure 
                              // 'http://loinc.org|8480-6',// 
                               'http://loinc.org|2085-9',  //cholesterol
+                             'http://loinc.org|8310-5', //temp
                               'http://loinc.org|2089-1']//
                            //   'http://loinc.org|55284-4']
                       }
@@ -40,6 +41,8 @@
           }
 
           var height = byCodes('8302-2');
+          
+          var temp = byCodes('8310-5');
           var systolicbp = getBloodPressureValue(byCodes('85354-9'),'8480-6');
           var diastolicbp = getBloodPressureValue(byCodes('85354-9'),'8462-4');
           var hdl = byCodes('2085-9');
@@ -62,6 +65,7 @@
 
           p.hdl = getQuantityValueAndUnit(hdl[0]);
           p.ldl = getQuantityValueAndUnit(ldl[0]);
+          p.temp = getQuantityValueAndUnit(temp[0]);
 
           ret.resolve(p);
         });
@@ -86,6 +90,7 @@
       diastolicbp: {value: ''},
       ldl: {value: ''},
       hdl: {value: ''},
+      temp:{value:''}
     };
   }
 
@@ -105,7 +110,21 @@
 
     return getQuantityValueAndUnit(formattedBPObservations[0]);
   }
+  
+  // MLYANG  Added here 8310-5 
+  
+  function getTempValue(code) {
+    var formattedTemp;
+      var BP = observation.component.find(function(component){
+        return component.code.coding.find(function(coding) {
+          return coding.code == typeOfPressure;
+        });
+           });
 
+    return getQuantityValueAndUnit(formattedBPObservations[0]);
+  }
+ 
+  
   function getQuantityValueAndUnit(ob) {
     if (typeof ob != 'undefined' &&
         typeof ob.valueQuantity != 'undefined' &&
@@ -129,6 +148,8 @@
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
     $('#hdl').html(p.hdl);
+    $('#temp').html(p.temp);
+    
   };
 
 })(window);
