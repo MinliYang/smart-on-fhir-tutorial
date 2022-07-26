@@ -15,10 +15,10 @@
                     type: 'Observation',
                     query: {
                       code: {
-                        $or: ['http://loinc.org|8302-2', // hight
+                        $or: ['http://loinc.org|8302-2', // high
                               'http://loinc.org|85354-9', // blood presure 
                              // 'http://loinc.org|8480-6',// 
-                              'http://loinc.org|2085-9',  //cl
+                              'http://loinc.org|2085-9',  //cholesterol
                               'http://loinc.org|2089-1']//
                            //   'http://loinc.org|55284-4']
                       }
