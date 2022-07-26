@@ -15,20 +15,38 @@
                     type: 'Observation',
                     query: {
                       code: {
-                        $or: ['http://loinc.org|8302-2', // high
-                              'http://loinc.org|85354-9', // blood presure 
-                             // 'http://loinc.org|8480-6',// 
-                              'http://loinc.org|2085-9',  //cholesterol
-                             'http://loinc.org|8310-5', //temp
-                              'http://loinc.org|2089-1']//
-                           //   'http://loinc.org|55284-4']
+                        $or: ['http://loinc.org|8302-2', // heigth
+                              'http://loinc.org|85354-9', //blood pressure
+                              'http://loinc.org|2085-9', // cholesterol
+                              'http://loinc.org|2089-1', //  Cholesterol in LDL [Mass/volume] in Serum or Plasma
+                              'http://loinc.org|8310-5' ] //  temp
                       }
                     }
                   });
+          // Allergies
+                 var aller = smart.patient.api.fetchAll({
+                    type: 'AllergyIntolerance',
+                    query: {
+                      "clinical-status": 'active'
+                    }
+                  });
 
-        $.when(pt, obv).fail(onError);
 
-        $.when(pt, obv).done(function(patient, obv) {
+        $.when(pt, obv, aller).fail(onError);
+
+        $.when(pt, obv,aller).done(function(patient, obv, allergy) {
+          console.log(allergy);
+          
+          var first_allergy = allergy[0].code.text;
+          console.log(first_allergy);
+          
+          var allergy_list = new Array();
+          for (let index = 0; index < allergy.length; ++index) {
+              allergy_list[index] = allergy[index].code.text;
+          }
+          var allergy_string = allergy_list.join("</div><div>");
+          allergy_string = "<div>" + allergy_string + "</div>";
+          
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
 
@@ -37,16 +55,14 @@
 
           if (typeof patient.name[0] !== 'undefined') {
             fname = patient.name[0].given.join(' ');
-            lname = patient.name[0].family;
+            lname = patient.name.family;
           }
-
           var height = byCodes('8302-2');
-          
-          var temp = byCodes('8310-5');
           var systolicbp = getBloodPressureValue(byCodes('85354-9'),'8480-6');
           var diastolicbp = getBloodPressureValue(byCodes('85354-9'),'8462-4');
           var hdl = byCodes('2085-9');
           var ldl = byCodes('2089-1');
+          var temperature = byCodes('8310-5');
 
           var p = defaultPatient();
           p.birthdate = patient.birthDate;
@@ -54,7 +70,9 @@
           p.fname = fname;
           p.lname = lname;
           p.height = getQuantityValueAndUnit(height[0]);
-
+          p.temperature = getQuantityValueAndUnit(temperature[0]);
+          p.allergies = allergy_string;
+          
           if (typeof systolicbp != 'undefined')  {
             p.systolicbp = systolicbp;
           }
@@ -65,8 +83,8 @@
 
           p.hdl = getQuantityValueAndUnit(hdl[0]);
           p.ldl = getQuantityValueAndUnit(ldl[0]);
-          p.temp = getQuantityValueAndUnit(temp[0]);
 
+          
           ret.resolve(p);
         });
       } else {
@@ -90,7 +108,8 @@
       diastolicbp: {value: ''},
       ldl: {value: ''},
       hdl: {value: ''},
-      temp:{value:''}
+      temperature: {value: ''},
+      allergies: {value: ''},
     };
   }
 
@@ -110,21 +129,7 @@
 
     return getQuantityValueAndUnit(formattedBPObservations[0]);
   }
-  
-  // MLYANG  Added here 8310-5 
-  
-  function getTempValue(code) {
-    var formattedTemp;
-      var BP = observation.component.find(function(component){
-        return component.code.coding.find(function(coding) {
-          return coding.code == typeOfPressure;
-        });
-           });
 
-    return getQuantityValueAndUnit(formattedBPObservations[0]);
-  }
- 
-  
   function getQuantityValueAndUnit(ob) {
     if (typeof ob != 'undefined' &&
         typeof ob.valueQuantity != 'undefined' &&
@@ -148,8 +153,8 @@
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
     $('#hdl').html(p.hdl);
-    $('#temp').html(p.temp);
-    
+    $('#temperature').html(p.temperature);
+    $('#allergy').html(p.allergies);
   };
 
 })(window);
